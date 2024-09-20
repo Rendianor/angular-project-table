@@ -1,0 +1,40 @@
+:host{
+    button {
+        margin-left: 10px;
+      }
+      mat-form-field {
+        display: block;
+        margin-bottom: 16px;
+        width: 100%;
+      }
+      
+      mat-form-field .mat-form-field-infix {
+        border-radius: 4px;
+      }
+      
+      button.mat-button {
+        font-size: 14px;
+        padding: 0 8px;
+        height: 24px;
+      }
+      
+      th.mat-header-cell {
+        font-weight: bold;
+        background: #f1f1f1;
+        color: #333;
+        text-align: left;
+        padding: 8px;
+      }
+      
+      td.mat-cell {
+        padding: 8px;
+      }
+      
+      tr.mat-row {
+        background: #fff;
+      }
+      
+      table.mat-elevation-z8 {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+}
