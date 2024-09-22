@@ -2,47 +2,51 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { ElementService } from '../../services/elements.service';
-
-
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 export interface PeriodicElement {
   position: number;
   name: string;
   weight: number;
   symbol: string;
 }
+@UntilDestroy()
 @Component({
   selector: 'app-element-table',
   templateUrl: './element-table.component.html',
-  styleUrls: ['./element-table.component.scss']
+  styleUrls: ['./element-table.component.scss'],
 })
 export class ElementTableComponent implements OnInit {
   displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
   dataSource: PeriodicElement[] = [];
   filteredData: PeriodicElement[] = [];
   filterControl = new FormControl('');
-  
+
   editing: { [key: number]: { [key: string]: boolean } } = {};
 
   constructor(private elementService: ElementService) {}
 
   ngOnInit(): void {
     this.filterControl.valueChanges
-      .pipe(debounceTime(2000))
-      .subscribe(value => this.applyFilter(value || ''));
+      .pipe(debounceTime(2000), untilDestroyed(this))
+      .subscribe((value) => this.applyFilter(value || ''));
 
-    this.elementService.getElements().subscribe(data => {
-      this.dataSource = data;
-      this.filteredData = data;
-    });
+    this.elementService
+      .getElements()
+      .pipe(untilDestroyed(this))
+      .subscribe((data) => {
+        this.dataSource = data;
+        this.filteredData = data;
+      });
   }
 
   applyFilter(filterValue: string): void {
     const filter = filterValue.toLowerCase();
-    this.filteredData = this.dataSource.filter(element => 
-      element.name.toLowerCase().includes(filter) ||
-      element.symbol.toLowerCase().includes(filter) ||
-      element.position.toString().includes(filter) ||
-      element.weight.toString().includes(filter)
+    this.filteredData = this.dataSource.filter(
+      (element) =>
+        element.name.toLowerCase().includes(filter) ||
+        element.symbol.toLowerCase().includes(filter) ||
+        element.position.toString().includes(filter) ||
+        element.weight.toString().includes(filter)
     );
   }
 
@@ -57,7 +61,11 @@ export class ElementTableComponent implements OnInit {
     this.editing[element.position][field] = false;
   }
 
-  saveEdit(element: PeriodicElement, field: keyof PeriodicElement, event: any): void {
+  saveEdit(
+    element: PeriodicElement,
+    field: keyof PeriodicElement,
+    event: any
+  ): void {
     const newValue = event.target.value;
 
     const updatedElement = { ...element };
@@ -72,7 +80,7 @@ export class ElementTableComponent implements OnInit {
       updatedElement['symbol'] = newValue;
     }
 
-    this.dataSource = this.dataSource.map(item =>
+    this.dataSource = this.dataSource.map((item) =>
       item.position === element.position ? updatedElement : item
     );
 
